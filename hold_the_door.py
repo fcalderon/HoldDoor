@@ -1,2 +1,2 @@
-__author__ = 'francisco'
+__author__ = 'Francisco Calderon and Grant Merrill'
 
