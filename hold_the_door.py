@@ -9,17 +9,17 @@ doorHoldingData = [
     {"distance": 7.5, "speed": 4, "attractiveness": 1, "familiar": False, "carrying": False,
      "weather": "scatter clouds, cold"},
     {"distance": 4, "speed": 4, "attractiveness": 1, "familiar": False, "carrying": False, "weather": 1},
-    {"distance": 6.5, "speed": 4.2, "attractiveness": 3, "familiar": True, "carrying": True,
+    {"distance": 6.5, "speed": 4.2, "attractiveness": 6, "familiar": True, "carrying": True,
      "weather": "snowing, very cold, icy"},
-    {"distance": 3, "speed": 4.5, "attractiveness": 0, "familiar": False, "carrying": False, "weather": .5},
-    {"distance": 7, "speed": 3, "attractiveness": 0, "familiar": False, "carrying": True, "weather": .3},
-    {"distance": 3, "speed": 4.5, "attractiveness": 0, "familiar": False, "carrying": False, "weather": .7},
-    {"distance": 15, "speed": 5, "attractiveness": 3, "familiar": False, "carrying": True, "weather": .6},
-    {"distance": 3, "speed": 4.5, "attractiveness": 0, "familiar": False, "carrying": True, "weather": .7},
-    {"distance": 20, "speed": 3, "attractiveness": 0, "familiar": True, "carrying": False, "weather": 1},
-    {"distance": 25, "speed": 3, "attractiveness": 0, "familiar": False, "carrying": False,
+    {"distance": 3, "speed": 4.5, "attractiveness": 7, "familiar": False, "carrying": False, "weather": .5},
+    {"distance": 7, "speed": 3, "attractiveness": 1, "familiar": False, "carrying": True, "weather": .3},
+    {"distance": 3, "speed": 4.5, "attractiveness": 3, "familiar": False, "carrying": False, "weather": .7},
+    {"distance": 15, "speed": 5, "attractiveness": 8, "familiar": False, "carrying": True, "weather": .6},
+    {"distance": 3, "speed": 4.5, "attractiveness": 2, "familiar": False, "carrying": True, "weather": .7},
+    {"distance": 20, "speed": 3, "attractiveness": 10, "familiar": True, "carrying": False, "weather": 1},
+    {"distance": 25, "speed": 3, "attractiveness": 1, "familiar": False, "carrying": False,
      "weather": .6},
-    {"distance": 20, "speed": 3, "attractiveness": 0, "familiar": True, "carrying": True, "weather": .5}
+    {"distance": 20, "speed": 3, "attractiveness": 5, "familiar": True, "carrying": True, "weather": .5}
 ]
 
 # Mean time it takes to fully open a door
@@ -70,3 +70,8 @@ def hold_door(is_someone_behind_you, data=None):
         raise NameError('If \'is_someone_behind_you\' is true then \'data\' must be provided')
     else:
         return True
+
+if __name__ == '__main__':
+    print("Should hold door: (yes)", hold_door(True, doorHoldingData[0]))
+    print("Should hold door: (no)", hold_door(True, doorHoldingData[1]))
+
