@@ -1,25 +1,32 @@
 __author__ = 'Francisco Calderon and Grant Merrill'
+import sys
+import numbers
+import decimal
+from random import randint
 
-# TODO Update attractiveness to be a number between 0 and 10
 # TODO update familiar to be whether the person is authorized to enter through that door
 
+help_message = "Usage: hold_the_door.py [blank] | [--someone_behind boolean (required)] [--distance : distance between person ft (required)] \n" \
+               "[--speed : speed at which the person is walking ftps (required)] \n" \
+               "[--attractiveness : person's attractiveness 1-10 scale] [--authorized : boolean]\n" \
+               "[--carrying : boolean] [--weather : 0-1 (0 = very bad, 1 = very nice)]"
 
 doorHoldingData = [
-    {"distance": 4.5, "speed": 5, "attractiveness": 0, "familiar": False, "carrying": True, "weather": .9},
-    {"distance": 7.5, "speed": 4, "attractiveness": 1, "familiar": False, "carrying": False,
-     "weather": "scatter clouds, cold"},
-    {"distance": 4, "speed": 4, "attractiveness": 1, "familiar": False, "carrying": False, "weather": 1},
-    {"distance": 6.5, "speed": 4.2, "attractiveness": 6, "familiar": True, "carrying": True,
-     "weather": "snowing, very cold, icy"},
-    {"distance": 3, "speed": 4.5, "attractiveness": 7, "familiar": False, "carrying": False, "weather": .5},
-    {"distance": 7, "speed": 3, "attractiveness": 1, "familiar": False, "carrying": True, "weather": .3},
-    {"distance": 3, "speed": 4.5, "attractiveness": 3, "familiar": False, "carrying": False, "weather": .7},
-    {"distance": 15, "speed": 5, "attractiveness": 8, "familiar": False, "carrying": True, "weather": .6},
-    {"distance": 3, "speed": 4.5, "attractiveness": 2, "familiar": False, "carrying": True, "weather": .7},
-    {"distance": 20, "speed": 3, "attractiveness": 10, "familiar": True, "carrying": False, "weather": 1},
-    {"distance": 25, "speed": 3, "attractiveness": 1, "familiar": False, "carrying": False,
+    {"distance": 4.5, "speed": 5, "attractiveness": 0, "authorized": None, "carrying": True, "weather": .9},
+    {"distance": 7.5, "speed": 4, "attractiveness": 1, "authorized": True, "carrying": False,
      "weather": .6},
-    {"distance": 20, "speed": 3, "attractiveness": 5, "familiar": True, "carrying": True, "weather": .5}
+    {"distance": 4, "speed": 4, "attractiveness": 1, "authorized": False, "carrying": False, "weather": 1},
+    {"distance": 6.5, "speed": 4.2, "attractiveness": 6, "authorized": True, "carrying": True,
+     "weather": .25},
+    {"distance": 3, "speed": 4.5, "attractiveness": 7, "authorized": None, "carrying": False, "weather": .5},
+    {"distance": 7, "speed": 3, "attractiveness": 1, "authorized": False, "carrying": True, "weather": .3},
+    {"distance": 3, "speed": 4.5, "attractiveness": 3, "authorized": False, "carrying": False, "weather": .7},
+    {"distance": 15, "speed": 5, "attractiveness": 8, "authorized": True, "carrying": True, "weather": .6},
+    {"distance": 3, "speed": 4.5, "attractiveness": 2, "authorized": False, "carrying": True, "weather": .7},
+    {"distance": 20, "speed": 3, "attractiveness": 10, "authorized": True, "carrying": False, "weather": 1},
+    {"distance": 25, "speed": 3, "attractiveness": 1, "authorized": None, "carrying": False,
+     "weather": .6},
+    {"distance": 20, "speed": 3, "attractiveness": 5, "authorized": True, "carrying": True, "weather": .5}
 ]
 
 # Mean time it takes to fully open a door
@@ -32,22 +39,76 @@ GENERAL_GRAY_AREA = 2
 FAMILIARITY_GRAY_AREA = 4
 
 
-def gray_area_size(attractiveness, weather=1, carrying=False):
+def gray_area_size(_data):
     """
     Determines the size of the gray area given to a certain person
-    :param attractiveness: Number between 0 and 10 describing the attractiveness of a person
-    :param weather: what the weather is between 0 (very bad) and 1 (very nice or indoor)
-    :param carrying: whether the person is holding something
+    :param _data
     :return: The gray area
     """
+    attractiveness = _data["attractiveness"]
+    weather = _data["weather"]
+    carrying = _data["carrying"]
+
     g_area = GENERAL_GRAY_AREA * weather
+
     if carrying:
         g_area += 4
 
     if attractiveness < 6:
         return g_area
 
+    if _data["authorized"] is not None:
+        if not _data["authorized"]:
+            g_area -= 4
+
     return ((attractiveness - 6) * 1640) + g_area
+
+
+def assessment(_data):
+    """
+    Returns a summary of why the door should (or not) be opened
+    :param _data: the data dictionary
+    :return:
+    """
+    if not _data["someone_behind"]:
+        return "No one behind, why bother?"
+
+    should = hold_door(True, _data)
+    print_out = ""
+
+    if should:
+        print_out += "You should because:\n"
+        if _data["weather"] < .6:
+            print_out += "* The weather is very nasty\n"
+        if 5 < _data["attractiveness"] < 8:
+            print_out += "* The person is attractive\n"
+        elif _data["attractiveness"] >= 8:
+            print_out += "* The person is VERY attractive\n"
+        if _data["authorized"]:
+            print_out += "* This is probably or colleague (could be your boss)\n"
+        if _data["carrying"]:
+            print_out += "* This person needs your help, you don't want to be rude\n"
+        if data["distance"] <= 4.5:
+            print_out += "* This person is within the acceptable distance\n"
+        elif (data["distance"] - 4.5) < gray_area_size(data):
+            print_out += "* This person is within the acceptable distance and gray area\n"
+        elif (data["distance"] - 4.5) < data["speed"] - TIME_TO_OPEN_DOOR:
+            print_out += "* This person is walking pretty fast and will be within the acceptable distance soon\n"
+    else:
+        print_out += "You shouldn't because:\n"
+        if not _data["authorized"] and _data["authorized"] is not None:
+            print_out += "* Who knows what the intentions of this person are, DON't OPEN IT, let security handle it\n"
+        if _data["weather"] < .6:
+            print_out += "* Don't despite the weather is very nasty\n"
+        if _data["attractiveness"] >= 8:
+            print_out += "* You will anyways since this person is VERY attractive (you might get in trouble though)\n"
+        if _data["carrying"]:
+            print_out += "* This person needs your help, but you shouldn't provide it (sorry)\n"
+        if (data["distance"] - 4.5) > gray_area_size(data):
+            print_out += "* This person is too far\n"
+        elif (data["distance"] - 4.5) > data["speed"] - TIME_TO_OPEN_DOOR:
+            print_out += "* This person is too far, not walking fast enough\n"
+    return print_out
 
 
 def hold_door(is_someone_behind_you, data=None):
@@ -60,7 +121,7 @@ def hold_door(is_someone_behind_you, data=None):
     if is_someone_behind_you and data:
         if data["distance"] <= 4.5:
             return True
-        elif (data["distance"] - 4.5) < gray_area_size(data["attractiveness"]):
+        elif (data["distance"] - 4.5) < gray_area_size(data):
             return True
         elif (data["distance"] - 4.5) < data["speed"] - TIME_TO_OPEN_DOOR:
             return True
@@ -71,7 +132,51 @@ def hold_door(is_someone_behind_you, data=None):
     else:
         return True
 
+
+def get_param(args, param_name):
+    if param_name not in args:
+        return None
+    arg = args[param_name + 1]
+    if arg in ["true", "True", "t", "T"]:
+        return True
+    elif arg in ["false", "False", "f", "F"]:
+        return False
+    elif isinstance(arg, (int, float, complex)):
+        return float(arg)
+    else:
+        return arg
+
 if __name__ == '__main__':
-    print("Should hold door: (yes)", hold_door(True, doorHoldingData[0]))
-    print("Should hold door: (no)", hold_door(True, doorHoldingData[1]))
+    if '-h' in sys.argv or '-help' in sys.argv:
+        print(help_message)
+        exit()
+    data = {}
+    if len(sys.argv) == 1:
+        print("DEMOING")
+        r = randint(0, len(doorHoldingData) - 1)
+        data = doorHoldingData[r]
+        data["someone_behind"] = True
+    else:
+        if '--someone_behind' not in sys.argv:
+            print(help_message)
+            exit()
+        else:
+            data["someone_behind"] = get_param(sys.argv, "--someone_behind")
+        if data["someone_behind"] and ('--distance' not in sys.argv or '--speed' not in sys.argv):
+            print(help_message)
+            exit()
+        data["distance"] = get_param(sys.argv, "--distance")
+        data["speed"] = get_param(sys.argv, "--speed")
+        data["attractiveness"] = get_param(sys.argv, "--attractiveness")
+        data["weather"] = get_param(sys.argv, "--weather")
+        data["authorized"] = get_param(sys.argv, "--authorized")
+        data["authorized"] = data["authorized"] in ["true", "True"]
+        data["attractiveness"] = get_param(sys.argv, "--attractiveness")
+        data["weather"] = get_param(sys.argv, "--weather")
+        print(assessment(data))
+        exit()
+    print(data)
+    print(assessment(data))
+
+
 
