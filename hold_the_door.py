@@ -1,7 +1,5 @@
 __author__ = 'Francisco Calderon and Grant Merrill'
 import sys
-import numbers
-import decimal
 from random import randint
 
 # TODO update familiar to be whether the person is authorized to enter through that door
@@ -111,19 +109,19 @@ def assessment(_data):
     return print_out
 
 
-def hold_door(is_someone_behind_you, data=None):
+def hold_door(is_someone_behind_you, _data=None):
     """
     Returns whether the door should be held
     :param is_someone_behind_you: whether there's a person for whom the door could be held for
-    :param data: the data to determine whether the hold should be held
+    :param _data: the data to determine whether the hold should be held
     :return: True if the door should be held, False otherwise
     """
-    if is_someone_behind_you and data:
-        if data["distance"] <= 4.5:
+    if is_someone_behind_you and _data:
+        if _data["distance"] <= 4.5:
             return True
-        elif (data["distance"] - 4.5) < gray_area_size(data):
+        elif (_data["distance"] - 4.5) < gray_area_size(_data):
             return True
-        elif (data["distance"] - 4.5) < data["speed"] - TIME_TO_OPEN_DOOR:
+        elif (_data["distance"] - 4.5) < _data["speed"] - TIME_TO_OPEN_DOOR:
             return True
 
         return False
@@ -177,6 +175,3 @@ if __name__ == '__main__':
         exit()
     print(data)
     print(assessment(data))
-
-
-
