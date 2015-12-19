@@ -44,20 +44,16 @@ def gray_area_size(_data):
     :return: The gray area
     """
     attractiveness = _data["attractiveness"]
-    weather = _data["weather"]
+    _weather = _data["weather"]
     carrying = _data["carrying"]
 
-    g_area = GENERAL_GRAY_AREA * weather
+    g_area = GENERAL_GRAY_AREA * _weather
 
     if carrying:
         g_area += 4
 
     if attractiveness < 6:
         return g_area
-
-    if _data["authorized"] is not None:
-        if not _data["authorized"]:
-            g_area -= 4
 
     return ((attractiveness - 6) * 1640) + g_area
 
@@ -84,7 +80,7 @@ def assessment(_data):
             print_out += "* The person is VERY attractive\n"
         if _data["authorized"]:
             print_out += "* This is probably or colleague (could be your boss)\n"
-        if _data["carrying"]:
+        if "carrying" in _data and _data["carrying"]:
             print_out += "* This person needs your help, you don't want to be rude\n"
         if data["distance"] <= 4.5:
             print_out += "* This person is within the acceptable distance\n"
@@ -95,7 +91,8 @@ def assessment(_data):
     else:
         print_out += "You shouldn't because:\n"
         if not _data["authorized"] and _data["authorized"] is not None:
-            print_out += "* Who knows what the intentions of this person are, DON't OPEN IT, let security handle it\n"
+            print_out += "* Person not authorized to enter, who knows what the intentions of this person are, " \
+                         "DON't OPEN IT, let security handle it\n"
         if _data["weather"] < .6:
             print_out += "* Don't despite the weather is very nasty\n"
         if _data["attractiveness"] >= 8:
@@ -117,6 +114,9 @@ def hold_door(is_someone_behind_you, _data=None):
     :return: True if the door should be held, False otherwise
     """
     if is_someone_behind_you and _data:
+        if _data["authorized"] is not None:
+            if not _data["authorized"]:
+                return False
         if _data["distance"] <= 4.5:
             return True
         elif (_data["distance"] - 4.5) < gray_area_size(_data):
@@ -132,17 +132,25 @@ def hold_door(is_someone_behind_you, _data=None):
 
 
 def get_param(args, param_name):
+    """
+    Returns the given param if found in the list of args in its most convenient format (int, string, boolean)
+    :param args: the list of args
+    :param param_name: the name of the parameter to find
+    :return: the value of the parameter if found, None otherwise
+    """
     if param_name not in args:
         return None
-    arg = args[param_name + 1]
+
+    arg = args[args.index(param_name) + 1]
     if arg in ["true", "True", "t", "T"]:
         return True
     elif arg in ["false", "False", "f", "F"]:
         return False
-    elif isinstance(arg, (int, float, complex)):
+    try:
         return float(arg)
-    else:
+    except ValueError:
         return arg
+
 
 if __name__ == '__main__':
     if '-h' in sys.argv or '-help' in sys.argv:
@@ -163,14 +171,18 @@ if __name__ == '__main__':
         if data["someone_behind"] and ('--distance' not in sys.argv or '--speed' not in sys.argv):
             print(help_message)
             exit()
+
         data["distance"] = get_param(sys.argv, "--distance")
         data["speed"] = get_param(sys.argv, "--speed")
         data["attractiveness"] = get_param(sys.argv, "--attractiveness")
         data["weather"] = get_param(sys.argv, "--weather")
         data["authorized"] = get_param(sys.argv, "--authorized")
-        data["authorized"] = data["authorized"] in ["true", "True"]
-        data["attractiveness"] = get_param(sys.argv, "--attractiveness")
-        data["weather"] = get_param(sys.argv, "--weather")
+        data["carrying"] = get_param(sys.argv, "--carrying")
+        attract = get_param(sys.argv, "--attractiveness")
+        data["attractiveness"] = attract if attract is not None else 5
+        weather = get_param(sys.argv, "--weather")
+        data["weather"] = weather if weather else 1
+        print(data)
         print(assessment(data))
         exit()
     print(data)
